@@ -1,0 +1,56 @@
+research_task:
+  description: >
+    Conduct a thorough research about {topic}
+    Make sure you find any interesting and relevant information given
+    the current year is 2024.
+  expected_output: >
+    A list with 10 bullet points of the most relevant information about {topic}. 
+    Make sure to to add concise and consistent data for each bullet point.  
+    Add code snnippets with examples, when we have how to do something in some part of the post.
+    Ensure We can.
+  agent: researcher
+
+writing_task:
+  description: >
+    Review the context you got and expand each topic into a full section for a blog post.
+    Make sure the post is detailed and contains any and all relevant information.
+  expected_output: >
+    A fully documented post. 
+    The content should be the whole post body, with all topics. 
+    Each topic should be presented with a full section of information.
+    Make sure to to add concise and consistent data for each section.
+    Add code snnippets with examples, when we have how to do something in some part of the post.
+    Ensure We can.
+    The content string should be formatted as markdown without '```'
+  agent: writer
+
+html_development_task:
+  description: >
+    Generate a html document, starting from DIV, based on the information from the context you've got. Don't include the title.
+  expected_output: >
+    A HTML string to be used in the wordpress tool
+  agent: html_page_developer
+
+json_development_task:
+  description: >
+    Generate a json document based on the html data from the context you've got. 
+    And Create a JSON with title, content, and status=draft properties. 
+    Content needs to be the html that comes from teh context.
+  expected_output: >
+    A JSON object with title, content, and status=draft properties. Remove the title text from content.
+  agent: json_developer
+
+post_publishing_task:
+  description: >
+    Use the context json you got and publish the post to wordpress. Pass all parameters needed to wordpress tool.
+    Extract the 'title', 'content', and 'status' from the json_result.
+  expected_output: >
+    The return of the wordpress tool
+  agent: wordpress_publisher
+
+image_generation_task:
+  description: >
+    Generate an image based on the context you've got.
+  expected_output: >
+    A image file
+  agent: image_designer
