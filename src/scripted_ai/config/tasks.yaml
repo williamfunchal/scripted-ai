@@ -1,8 +1,8 @@
 research_task:
   description: >
     Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is 2024.
+    Make sure you find any interesting and relevant information 
+    Include web information. Don't forget to include the main source of the information from {main_font}
   expected_output: >
     A list with 10 bullet points of the most relevant information about {topic}. 
     Make sure to to add concise and consistent data for each bullet point.  
@@ -14,6 +14,7 @@ writing_task:
   description: >
     Review the context you got and expand each topic into a full section for a blog post.
     Make sure the post is detailed and contains any and all relevant information.
+    Make sure to mention the data source.
   expected_output: >
     A fully documented post. 
     The content should be the whole post body, with all topics. 
@@ -27,6 +28,9 @@ writing_task:
 html_development_task:
   description: >
     Generate a html document, starting from DIV, based on the information from the context you've got. Don't include the title.
+    Add the image as image tag created by the image designer in the post header.
+    Use the GCP bucket image. Make sure to not use the DallE url.
+    Mention that this image was created by Dalle AI.
   expected_output: >
     A HTML string to be used in the wordpress tool
   agent: html_page_developer
@@ -50,7 +54,21 @@ post_publishing_task:
 
 image_generation_task:
   description: >
-    Generate an image based on the context you've got.
+    Generate an image based on the context you've got. Dowload the file from the response and save it in the same directory
   expected_output: >
-    A image file
+    Json with the image_url property. Do not add any string to the url from Dalle.
+  agent: image_designer
+
+image_download_task:
+  description: >
+    Download the image from the response image_url property and save it. Remove any \ in the image_url string value.
+  expected_output: >
+    header.png saved locally
+  agent: image_designer
+
+image_uploader_task:
+  description: >
+    Upload the header.png image to GCP and return the url of the uploaded image.
+  expected_output: >
+    The google storage image url to be used by the html developer
   agent: image_designer

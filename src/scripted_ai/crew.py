@@ -3,15 +3,18 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
 from crewai_tools import (
-    DirectoryReadTool,
     FileReadTool,
+    ScrapeWebsiteTool,
     SerperDevTool,
     WebsiteSearchTool
 )
 from crewai_tools.tools import DallETool
 
 from scripted_ai.models.post_data import PostData
+from scripted_ai.tools.gcp_image_uploader import GCPImageUploaderTool
+from scripted_ai.tools.image_downloader import ImageDownloaderTool
 from scripted_ai.tools.wordpress_tool import WordpressTool
+from scripted_ai.knowledge.crew_ai_knowledge_source import CrewAiKnowledgeSource
 from bs4 import BeautifulSoup
 
 # If you want to run a snippet of code before or after the crew starts, 
@@ -29,12 +32,19 @@ class ScriptedAi():
 	tasks_config = 'config/tasks.yaml'
  
 	search_tool = SerperDevTool()
-	web_rag_tool = WebsiteSearchTool()
+	scrape_tool = ScrapeWebsiteTool(website="{main_font}")
+	web_rag_tool = WebsiteSearchTool(website="{main_font}")
 	file_reader = FileReadTool()
 	wordpress_tool = WordpressTool()
+	image_downloader = ImageDownloaderTool()
+	image_uploader = GCPImageUploaderTool()
+	
+	
+ 
+	# crewai_base_knowledge = CrewAiKnowledgeSource()
  
 	dalle_tool = DallETool(model="dall-e-3",
-						size="512x512",
+						size="1024x1024",
 						quality="standard",
 						n=1)
 
@@ -44,14 +54,16 @@ class ScriptedAi():
 	def researcher(self) -> Agent:
 		return Agent(
 			config=self.agents_config['researcher'],
-			verbose=True,			
+			verbose=True,
+			# knowledge_sources=[self.crewai_base_knowledge],
 		)
 
 	@agent
 	def writer(self) -> Agent:
 		return Agent(
 			config=self.agents_config['writer'],
-			verbose=True
+			verbose=True,
+			llm="gpt-4o",   
 		)
   
 	@agent
@@ -73,7 +85,7 @@ class ScriptedAi():
 	def image_designer(self) -> Agent:
 		return Agent(
 			config=self.agents_config['image_designer'],
-			verbose=True,			
+			verbose=True,
 		)
   
 	@agent
@@ -87,8 +99,7 @@ class ScriptedAi():
 		return Agent(
 			config=self.agents_config['content_manager'],
 			verbose=True,
-			allow_delegation=True,
-			llm="gpt-4o",
+			allow_delegation=False,
 		)
 
 	# To learn more about structured task outputs, 
@@ -99,7 +110,9 @@ class ScriptedAi():
 		return Task(
 			config=self.tasks_config['research_task'],
 			tools=[
-				self.search_tool
+    			self.scrape_tool,
+				# self.search_tool,
+				self.web_rag_tool
 			]
 		)
 
@@ -110,7 +123,43 @@ class ScriptedAi():
 			output_file='post.md',
 			context=[
 				self.research_task()
-			]
+			],
+		)
+  
+	@task
+	def image_generation_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['image_generation_task'],
+			context=[
+				self.research_task()
+			],
+			tools=[
+				self.dalle_tool
+			],
+		)
+	
+	@task
+	def image_download_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['image_download_task'],
+			context=[
+				self.image_generation_task()
+			],
+			tools=[
+				self.image_downloader
+			],
+		)
+  
+	@task
+	def image_uploader_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['image_uploader_task'],
+			context=[
+				self.image_download_task()
+			],
+			tools=[
+				self.image_uploader
+			],
 		)
 
 	@task
@@ -119,7 +168,9 @@ class ScriptedAi():
 			config=self.tasks_config['html_development_task'],
 			output_file='post.html',
 			context=[
-				self.writing_task()
+				self.writing_task(),
+				self.image_generation_task(),
+				self.image_uploader_task()
 			]
 		)
 
@@ -132,18 +183,6 @@ class ScriptedAi():
 			],
 			outputs={"json_result": "{output}"},
 			output_validation=PostData
-		)
-  
-	@task
-	def image_generation_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['image_generation_task'],
-			context=[
-				self.writing_task()
-			],
-			tools=[
-				self.dalle_tool
-			]
 		)
   
 	@task
@@ -175,7 +214,7 @@ class ScriptedAi():
 			tasks=self.tasks, # Automatically created by the @task decorator
 			process=Process.sequential,
 			verbose=True,
-			# memory=True,
+			memory=True,
 			# manager_agent=self.content_manager(),
 			# process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
 		)

@@ -11,7 +11,8 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-PROMPT = "CRUD in Spring Boot."
+PROMPT = "What is a crew in CrewAI? A complete guide to understanding crews."
+MAIN_FONT = "https://docs.crewai.com/concepts/crews"
 
 def run():
     """
@@ -20,6 +21,7 @@ def run():
     
     inputs = {
         "topic": f"{PROMPT}",
+        "main_font": f"{MAIN_FONT}"
     }
     ScriptedAi().crew().kickoff(inputs=inputs)
 
@@ -30,6 +32,8 @@ def train():
     """
     inputs = {
         "topic": f"{PROMPT}",
+        "main_font": f"{MAIN_FONT}"
+        
     }
     try:
         ScriptedAi().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
@@ -53,6 +57,8 @@ def test():
     """
     inputs = {
         "topic": f"{PROMPT}",
+        "main_font": f"{MAIN_FONT}"
+        
     }
     try:
         ScriptedAi().crew().test(n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs)
