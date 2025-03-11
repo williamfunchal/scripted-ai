@@ -11,8 +11,12 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-PROMPT = "What is a crew in CrewAI? A complete guide to understanding crews."
-MAIN_FONT = "https://docs.crewai.com/concepts/crews"
+PROMPT = "Reactive programming with Go"
+MAIN_FONT = (
+    "https://go.dev/doc/effective_go"
+    
+)
+            
 
 def run():
     """

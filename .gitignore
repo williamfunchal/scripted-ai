@@ -2,3 +2,6 @@
 __pycache__/
 # remove db folder
 db/
+training_data.pkl
+trained_agents_data.pkl
+

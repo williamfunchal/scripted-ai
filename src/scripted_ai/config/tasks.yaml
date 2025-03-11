@@ -16,12 +16,11 @@ writing_task:
     Make sure the post is detailed and contains any and all relevant information.
     Make sure to mention the data source.
   expected_output: >
-    A fully documented post. 
+    A fully blog post. 
     The content should be the whole post body, with all topics. 
     Each topic should be presented with a full section of information.
     Make sure to to add concise and consistent data for each section.
-    Add code snnippets with examples, when we have how to do something in some part of the post.
-    Ensure We can.
+    When talking about ptogramming, add code snnippets with examples.
     The content string should be formatted as markdown without '```'
   agent: writer
 
@@ -61,9 +60,9 @@ image_generation_task:
 
 image_download_task:
   description: >
-    Download the image from the response image_url property and save it. Remove any \ in the image_url string value.
+    Save image from the response image_url property. 
   expected_output: >
-    header.png saved locally
+    header.png saved locally. remove the \ char from the source url, if exists.
   agent: image_designer
 
 image_uploader_task:

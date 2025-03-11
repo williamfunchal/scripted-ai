@@ -47,6 +47,21 @@ class ScriptedAi():
 						size="1024x1024",
 						quality="standard",
 						n=1)
+ 
+	def create_researcher_tools(self): 
+		#split string by ,
+		main_font_string = "{main_font}"
+		main_font = main_font_string.split(",")
+	
+		tools = []
+		tools.append(self.search_tool)
+		#loop through the main_font list and add each as a WebsiteSearchTool
+		for font in main_font:
+			tools.append(WebsiteSearchTool(website=font))
+			tools.append(ScrapeWebsiteTool(website=font))
+   
+		return tools
+
 
 	# If you would like to add tools to your agents, you can learn more about it here:
 	# https://docs.crewai.com/concepts/agents#agent-tools
@@ -55,6 +70,7 @@ class ScriptedAi():
 		return Agent(
 			config=self.agents_config['researcher'],
 			verbose=True,
+			allow_delegation=False,
 			# knowledge_sources=[self.crewai_base_knowledge],
 		)
 
@@ -63,6 +79,7 @@ class ScriptedAi():
 		return Agent(
 			config=self.agents_config['writer'],
 			verbose=True,
+			allow_delegation=False,
 			llm="gpt-4o",   
 		)
   
@@ -71,7 +88,7 @@ class ScriptedAi():
 		return Agent(
 			config=self.agents_config['html_page_developer'],
 			verbose=True,
-			
+			allow_delegation=False,
 		)
   
 	@agent
@@ -79,27 +96,29 @@ class ScriptedAi():
 		return Agent(
 			config=self.agents_config['json_developer'],
 			verbose=True,
-			
+			allow_delegation=False,
 		)
 	@agent
 	def image_designer(self) -> Agent:
 		return Agent(
 			config=self.agents_config['image_designer'],
 			verbose=True,
+			allow_delegation=False,
 		)
   
 	@agent
 	def wordpress_publisher(self) -> Agent:
 		return Agent(
 			config=self.agents_config['wordpress_publisher'],
-			verbose=True,			
+			verbose=True,	
+			allow_delegation=False,
 		)
   
 	def content_manager(self) -> Agent:
 		return Agent(
 			config=self.agents_config['content_manager'],
 			verbose=True,
-			allow_delegation=False,
+			allow_delegation=True,
 		)
 
 	# To learn more about structured task outputs, 
@@ -109,11 +128,7 @@ class ScriptedAi():
 	def research_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['research_task'],
-			tools=[
-    			self.scrape_tool,
-				# self.search_tool,
-				self.web_rag_tool
-			]
+			tools=self.create_researcher_tools()
 		)
 
 	@task
@@ -205,16 +220,14 @@ class ScriptedAi():
 
 	@crew
 	def crew(self) -> Crew:
-		"""Creates the ScriptedAi crew"""
+		#"""Creates the ScriptedAi crew"""
 		# To learn how to add knowledge sources to your crew, check out the documentation:
 		# https://docs.crewai.com/concepts/knowledge#what-is-knowledge
 
 		return Crew(
 			agents=self.agents, # Automatically created by the @agent decorator
-			tasks=self.tasks, # Automatically created by the @task decorator
-			process=Process.sequential,
-			verbose=True,
-			memory=True,
+			tasks=self.tasks, # Automatically created by the @task decorator			
 			# manager_agent=self.content_manager(),
 			# process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+   			verbose=True,
 		)
