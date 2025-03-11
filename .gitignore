@@ -5,3 +5,5 @@ db/
 training_data.pkl
 trained_agents_data.pkl
 
+credentials.json
+
